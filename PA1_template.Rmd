@@ -6,20 +6,121 @@ output:
 ---
 
 
+
+
 ## Loading and preprocessing the data
 
 
-
+```{r load , echo=TRUE}
+    setwd("C:/Users/chaudharyan/Desktop/RepData_PeerAssessment1")
+    file<-read.csv("./activity/activity.csv", header=TRUE)
+    
+     
+```
 ## What is mean total number of steps taken per day?
-
-
+    
+```{r meansteps, echo=TRUE}
+    data<-na.omit(file)
+    s<-aggregate(list(Steps=data$steps), list(Date=data$date), sum)
+    hist(s$Steps, main="Total number of steps taken each day", xlab="Steps",col="grey")
+    mean(s$Steps)
+    median(s$Steps)
+```
 
 ## What is the average daily activity pattern?
+    
+A time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days
+```{r average , echo=TRUE}   
+data<-na.omit(file)   
+m<-aggregate(list(MeanSteps=data$steps), list(Interval=data$interval), mean)
+plot(m$Interval, m$MeanSteps, type="l", xlab="Interval", ylab="Mean Steps",main="Average number of steps")
 
+```
+
+
+The 5-minute interval, on average across all the days in the dataset, which contains the maximum number of steps
+
+```{r maxaverage, echo=TRUE}
+m[which.max(m$MeanSteps),]
+
+```
 
 
 ## Imputing missing values
 
+Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+```{r include=FALSE}
+library(dplyr)
+```
+
+```{r missing, echo=TRUE}
+
+    
+    na_rows<-nrow(filter(file, is.na(file$steps)==TRUE))
+    
+```
+
+Calcualting mean of every 5-minute interval and creating new dataset with missing value filled in with the mean
+
+```{r fillthemissing, echo=TRUE}  
+
+    o <- na.omit(file) 
+    Int_mean <- aggregate(list(Steps=o$steps), list(Interval=o$interval), mean)
+    
+    
+    f<-file
+
+    for(i in seq(0,2355,5)) 
+    {
+        f[f$interval==i & is.na(f$steps)==TRUE,1]<- Int_mean[Int_mean$Interval==i,2]
+        
+    }
+    h<-aggregate(list(Steps=f$steps), list(Date=f$date), sum)
+    hist(h$Steps, main="Total number of steps taken each day", xlab="Steps",col="grey")
+    mean(h$Steps)
+    median(h$Steps)
+    
+```
+
+When I compare the mean and median value calcualted above with the first part of asingnment, I find no difference in mean value and a very small difference in median value . 
+
+
+First Part of assignment 
+```{r}
+    mean(s$Steps)
+    median(s$Steps)
+```
+
+Current Assignment 
+```{r}
+    mean(h$Steps)
+    median(h$Steps)
+```
+
+When I compare the the total steps from then first part of the assignment with the 5-minute interval filled NA values, I find an increase of 86,129 in the total numbers. This implies that filling the missing values does impact the total daily number of steps.
+
+First Part of assignment 
+```{r}
+    sum(s$Steps)
+```
+
+Current Assignment 
+```{r}
+    sum(h$Steps)
+```
+
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```{r weekday, echo=TRUE}
+f$day<-weekdays(as.Date(f$date))
+f$Week<-factor(f$day %in% c("Monday","Tuesday","Wednesday","Thursday","Friday"),levels=c(TRUE,FALSE),         labels=c("weekday","weekend") )
+
+ag_Day<-aggregate(list(Steps=f$steps), list(Wkday=f$Week, Interval=f$interval), mean)
+
+library(ggplot2)
+ggplot(ag_Day,aes(x=Interval, y=Steps))+geom_line(color="dark blue")+facet_wrap(~Wkday) +labs(x="Interval", y="Number of steps")
+
+
+```
