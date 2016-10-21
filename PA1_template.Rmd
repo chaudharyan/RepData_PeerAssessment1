@@ -18,6 +18,12 @@ output:
      
 ```
 ## What is mean total number of steps taken per day?
+
+ 1. Ignore the missing values in the dataset.
+ 2. Calculate the total number of steps taken per day by aggregate()
+ 3. Make a histogram of the total number of steps taken each day
+ 4. Calcualte mean and median of the total number of steps taken per day
+
     
 ```{r meansteps, echo=TRUE}
     data<-na.omit(file)
@@ -28,8 +34,11 @@ output:
 ```
 
 ## What is the average daily activity pattern?
-    
-A time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days
+
+1. Ignore the missing values in the dataset.
+2. Calculate the average steps taken for each Interval by aggregate()
+3. Create a plot of Interval and the average number of steps taken, averaged across all days
+
 ```{r average , echo=TRUE}   
 data<-na.omit(file)   
 m<-aggregate(list(MeanSteps=data$steps), list(Interval=data$interval), mean)
@@ -38,7 +47,7 @@ plot(m$Interval, m$MeanSteps, type="l", xlab="Interval", ylab="Mean Steps",main=
 ```
 
 
-The 5-minute interval, on average across all the days in the dataset, which contains the maximum number of steps
+The Interval which has the maximum number of steps averaged across all days
 
 ```{r maxaverage, echo=TRUE}
 m[which.max(m$MeanSteps),]
@@ -48,7 +57,10 @@ m[which.max(m$MeanSteps),]
 
 ## Imputing missing values
 
-Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+1. Ignore the missing values in the dataset.
+2. Filled NA's with means for that 5-minute interval and created a new dataset with these values
+3. Creating histogram of total number of steps taken each day  
+
 ```{r include=FALSE}
 library(dplyr)
 ```
@@ -112,6 +124,8 @@ Current Assignment
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+Weekend activity patters is between 100-150 numbers of steps for Interval between 500-2000
+Whereas Weekday activity peaks between 500-1000 Interval and then stays around 100 steps after 1000 to 2000
 
 ```{r weekday, echo=TRUE}
 f$day<-weekdays(as.Date(f$date))
@@ -121,6 +135,4 @@ ag_Day<-aggregate(list(Steps=f$steps), list(Wkday=f$Week, Interval=f$interval), 
 
 library(ggplot2)
 ggplot(ag_Day,aes(x=Interval, y=Steps))+geom_line(color="dark blue")+facet_wrap(~Wkday) +labs(x="Interval", y="Number of steps")
-
-
 ```
